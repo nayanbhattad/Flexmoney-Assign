@@ -1,19 +1,21 @@
 import React, { useState } from "react"
 import { Form, Field } from "react-final-form"
-import { Button, CircularProgress, DialogContent, DialogContentText, DialogTitle, IconButton, Paper, TextField } from "@mui/material"
+import { Button, CircularProgress, DialogContent, DialogContentText, DialogTitle, IconButton, InputAdornment, Paper, TextField } from "@mui/material"
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline"
+import CreditCardIcon from "@mui/icons-material/CreditCard"
 import Dropdown from "../../components/Dropdown"
 import { LoadingButton } from "@mui/lab"
 
 import logo from "../../assests/images/logo.png"
-import sucess from '../../assests/images/success.png'
-import error from '../../assests/images/error.png'
+import sucess from "../../assests/images/success.png"
+import error from "../../assests/images/error.png"
 import InfoDialog from "../../components/Dialog"
 
 function CredDetailsForm() {
 	const [loading, setLoading] = useState(false)
 	const [openDialog, setOpenDialog] = useState(false)
 	const [data, setData] = useState({})
+	const [cardValue, setCardvalue] = useState("")
 
 	const handleClose = () => {
 		setOpenDialog(false)
@@ -90,6 +92,27 @@ function CredDetailsForm() {
 				console.log(error)
 			})
 	}
+
+	const handleCardChange = (e) => {
+		const regex = /^[0-9\b]+$/
+		if (e.target.value === "" || regex.test(e.target.value)) {
+			setCardvalue(e.target.value)
+		}
+	}
+
+	const cc_format = (value) => {
+		const v = value
+			.replace(/\s+/g, "")
+			.replace(/[^0-9]/gi, "")
+			.substr(0, 16)
+		const parts = []
+
+		for (let i = 0; i < v.length; i += 4) {
+			parts.push(v.substr(i, 4))
+		}
+
+		return parts.length > 1 ? parts.join(" ") : value
+	}
 	return (
 		<div className="card-details max-w-[800px]  min-w-[300px] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
 			<Paper elevation={4}>
@@ -107,19 +130,30 @@ function CredDetailsForm() {
 						render={({ handleSubmit, form, submitting, pristine, values, submitSucceeded }) => (
 							<form onSubmit={handleSubmit}>
 								<Field name="cardNo">
-									{({ input, meta }) => (
-										<div style={{ padding: "10px 0" }}>
-											<TextField {...input} type="number" label="Card Number" size="small" fullWidth />
-											{meta.error && meta.touched && (
-												<div className="flex gap-1 items-center">
-													<IconButton sx={{ px: 0 }} disabled>
-														<ErrorOutlineIcon color="error" />
-													</IconButton>
-													<span className="text-red-600">{meta.error}</span>
-												</div>
-											)}
-										</div>
-									)}
+									{({ input, meta }) => {
+										return (
+											<div style={{ padding: "10px 0" }}>
+												<TextField
+													{...input}
+													type="number"
+													label="Card Number"
+													size="small"
+													fullWidth
+													InputProps={{
+														endAdornment: <InputAdornment position="end"><CreditCardIcon/></InputAdornment>,
+													}}
+												/>
+												{meta.error && meta.touched && (
+													<div className="flex gap-1 items-center">
+														<IconButton sx={{ px: 0 }} disabled>
+															<ErrorOutlineIcon color="error" />
+														</IconButton>
+														<span className="text-red-600">{meta.error}</span>
+													</div>
+												)}
+											</div>
+										)
+									}}
 								</Field>
 								<Field name="name">
 									{({ input, meta }) => (
@@ -227,19 +261,19 @@ function CredDetailsForm() {
 						<DialogContentText id="alert-dialog-description">
 							{"success" in data && data.success == true && (
 								<div>
-                                    <div className="flex items-center mx-auto pb-5">
-                                        <img style={{margin:"0 auto"}} src={sucess} width={150}/>
-                                    </div>
+									<div className="flex items-center mx-auto pb-5">
+										<img style={{ margin: "0 auto" }} src={sucess} width={150} />
+									</div>
 									<div>Request ID : {data.data.requestId}</div>
 									<div>name : {data.data.name}</div>
 									<div>requestDate : {data.data.requestDate}</div>
 								</div>
 							)}
-                            {"success" in data && data.success == false && (
+							{"success" in data && data.success == false && (
 								<div>
-                                    <div className="flex items-center mx-auto pb-5">
-                                        <img style={{margin:"0 auto"}} src={error} width={150}/>
-                                    </div>
+									<div className="flex items-center mx-auto pb-5">
+										<img style={{ margin: "0 auto" }} src={error} width={150} />
+									</div>
 									<div>Error: {data.data}</div>
 								</div>
 							)}

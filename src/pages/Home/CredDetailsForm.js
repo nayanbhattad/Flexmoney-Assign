@@ -15,7 +15,7 @@ function CredDetailsForm() {
 	const [loading, setLoading] = useState(false)
 	const [openDialog, setOpenDialog] = useState(false)
 	const [data, setData] = useState({})
-	const [cardValue, setCardvalue] = useState("")
+	const [cardValue, setCardValue] = useState("")
 
 	const handleClose = () => {
 		setOpenDialog(false)
@@ -31,10 +31,10 @@ function CredDetailsForm() {
 		if (!values.name) {
 			errors.name = "This field is required"
 		}
-		if (!values.cardNo) {
+		if (!cardValue) {
 			errors.cardNo = "This field is required"
 		}
-		if (values.cardNo && !values.cardNo.match(visaRegEx) && !values.cardNo.match(mastercardRegEx)) {
+		if (cardValue && !cardValue.match(visaRegEx) && !cardValue.match(mastercardRegEx)) {
 			errors.cardNo = "Invalid Visa or Mastercard"
 		}
 		if (!values.cvv) {
@@ -94,9 +94,9 @@ function CredDetailsForm() {
 	}
 
 	const handleCardChange = (e) => {
-		const regex = /^[0-9\b]+$/
-		if (e.target.value === "" || regex.test(e.target.value)) {
-			setCardvalue(e.target.value)
+        const limitChar = 16
+		if (e.target.value.toString().length <= limitChar) {
+			setCardValue(e.target.value)
 		}
 	}
 
@@ -129,18 +129,34 @@ function CredDetailsForm() {
 						validate={validate}
 						render={({ handleSubmit, form, submitting, pristine, values, submitSucceeded }) => (
 							<form onSubmit={handleSubmit}>
-								<Field name="cardNo">
-									{({ input, meta }) => {
+								<Field name="cardNo" inputOnChange={handleCardChange} inputValue={cardValue}>
+									{({ input, meta, inputOnChange }) => {
+										const inputProps = {
+											...input,
+
+											onChange: (e) => {
+												input.onChange(e)
+
+												inputOnChange && inputOnChange(e)
+											},
+
+											value: cardValue,
+										}
+
 										return (
 											<div style={{ padding: "10px 0" }}>
 												<TextField
-													{...input}
+													{...inputProps}
 													type="number"
 													label="Card Number"
 													size="small"
 													fullWidth
 													InputProps={{
-														endAdornment: <InputAdornment position="end"><CreditCardIcon/></InputAdornment>,
+														endAdornment: (
+															<InputAdornment position="end">
+																<CreditCardIcon />
+															</InputAdornment>
+														),
 													}}
 												/>
 												{meta.error && meta.touched && (
